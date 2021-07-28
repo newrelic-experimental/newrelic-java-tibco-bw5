@@ -1,0 +1,3 @@
+rootProject.name = 'java-instrumentation-template'
+include 'tibco-bw-engine-5'
+include 'tibco-bw-services-5'
