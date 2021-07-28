@@ -9,7 +9,7 @@ Provides instrumentation for Tibco BusinessWorks 5.x.  Adds tracking of Jobs and
 To install the New Relic Java Agent on Tibco BusinessWorks see [Install Java Agent](./Install-Java-Agent.md)
 To install the instrumentation:
 1. Download the latest release.    
-2. Also download the latest release of Tibco Core instrumentation to provide support for JMS and Rendevous [
+2. Also download the latest release of Tibco Core instrumentation to provide support for JMS and Rendevous [Tibco-Core-Instrumentation](https://github.com/newrelic-experimental/newrelic-java-tibco-core)
 3. In the New Relic Java Agent directory, create a directory named extensions if it does not already exist.
 4. Copy the downloaded jar files into the extensions directory
 5. Restart the Tibco Instance
