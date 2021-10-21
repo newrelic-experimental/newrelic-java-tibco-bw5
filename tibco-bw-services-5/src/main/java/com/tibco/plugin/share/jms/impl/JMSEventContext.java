@@ -23,6 +23,6 @@ public abstract class JMSEventContext {
 	
 	@Trace
 	public void reply(Session var1, MessageProducer var2, Message var3, int var4, int var5, long var6, String var8) {
-		
+		Weaver.callOriginal();
 	}
 }
