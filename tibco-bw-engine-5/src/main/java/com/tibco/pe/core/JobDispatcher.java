@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Transaction;
 import com.newrelic.api.agent.TransactionNamePriority;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
+import com.nr.tibco.engine.instrumentation.JobUtils;
 import com.tibco.pe.util.Reminder;
 
 @Weave
@@ -33,11 +34,11 @@ public abstract class JobDispatcher {
 			String fullCallName = job.getName();
 			String tmp = NewRelic.getAgent().getTracedMethod().getMetricName();
 			if(!tmp.equalsIgnoreCase(fullCallName)) {
-				NewRelic.getAgent().getTracedMethod().setMetricName(new String[] {"Custom","JobCourier",fullCallName});
+				NewRelic.getAgent().getTracedMethod().setMetricName(new String[] {"Custom","JobCourier",JobUtils.maskJobNumber(fullCallName)});
 			}
 			Transaction transaction = NewRelic.getAgent().getTransaction();
 			if(!transaction.isTransactionNameSet()) {
-				NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, true, "Job", new String[] {fullCallName});
+				NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, true, "Job", new String[] {JobUtils.maskJobNumber(fullCallName)});
 			}
 			if(job.token != null) {
 				job.token.link();

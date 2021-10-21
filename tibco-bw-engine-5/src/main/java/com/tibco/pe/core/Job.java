@@ -53,6 +53,7 @@ implements ProcessContext
 		}
 		return ((Long)Weaver.callOriginal()).longValue();
 	}
+	
 	@Trace(dispatcher=true)
 	long k() {
 		NewRelic.addCustomParameter("Job Name", getName());
@@ -68,17 +69,15 @@ implements ProcessContext
 			}
 		}
 
-		NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Job", new String[] { workflowName });
+		NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Job", new String[] { JobUtils.maskJobNumber(workflowName) });
 		return ((Long)Weaver.callOriginal()).longValue();
 	}
 	
 	@Trace(dispatcher=true)
 	public Job spawnJob(String paramString1, String paramString2, XiNode paramXiNode, String paramString3, String paramString4) {
-//		Logger logger = NewRelic.getAgent().getLogger();
 		Job job = (Job)Weaver.callOriginal();
 		if (job.token == null){
 			job.token = NewRelic.getAgent().getTransaction().getToken();
-//			logger.log(Level.FINE, "Got token from transaction {0} in {1}.spawnJob", job.token,getClass().getName());
 		}
 		return job;
 	}
