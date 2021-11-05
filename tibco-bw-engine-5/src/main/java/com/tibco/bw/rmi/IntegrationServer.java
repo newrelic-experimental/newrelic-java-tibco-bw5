@@ -8,22 +8,24 @@ import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
-import com.nr.tibco.engine.instrumentation.OutboundWrapper;
+import com.nr.tibco.engine.instrumentation.ServerHeaders;
 
 @Weave(type=MatchType.Interface)
 public abstract class IntegrationServer {
 
 	@Trace(dispatcher=true)
 	public void send(ServerRequest request, Remote paramRemote) throws RemoteException {
-		OutboundWrapper wrapper = new OutboundWrapper(request);
-		NewRelic.getAgent().getTracedMethod().addOutboundRequestHeaders(wrapper);
+		ServerHeaders headers = new ServerHeaders(request);
+		
+		NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		Weaver.callOriginal();
 	}
 
 	@Trace(dispatcher=true)
 	public void send(ServerRequest request) throws RemoteException {
-		OutboundWrapper wrapper = new OutboundWrapper(request);
-		NewRelic.getAgent().getTracedMethod().addOutboundRequestHeaders(wrapper);
+		ServerHeaders headers = new ServerHeaders(request);
+		
+		NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		Weaver.callOriginal();
 	}
 

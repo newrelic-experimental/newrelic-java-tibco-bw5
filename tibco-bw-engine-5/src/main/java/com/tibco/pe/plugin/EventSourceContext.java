@@ -15,7 +15,7 @@ public abstract class EventSourceContext {
 	@Trace
 	public void newEvent(XiNode paramXiNode, EventContext paramEventContext) {
 		String processName = getProcessModelName() != null ? getProcessModelName() : "UnknownProcess";
-		NewRelic.addCustomParameter("Process Name", processName);
+		NewRelic.getAgent().getTracedMethod().addCustomAttribute("ProcessName", processName);
 		NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.CUSTOM_HIGH, true, "Event", new String[] {processName});
 		Weaver.callOriginal();
 	}

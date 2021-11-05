@@ -38,9 +38,8 @@ public abstract class ProcessStats
         processName = workflow.getName();
       }
     }
-    if(job.token != null) {
-    	job.token.expire();
-    	job.token = null;
+    if(job.headers != null) {
+    	job.headers = null;
     }
     NRProcessStats.addStats(processName, invokeTime, elapsedTime, aborted, 1);
   }

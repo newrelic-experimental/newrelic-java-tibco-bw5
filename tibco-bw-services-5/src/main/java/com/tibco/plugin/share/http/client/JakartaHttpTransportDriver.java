@@ -51,17 +51,13 @@ public abstract class JakartaHttpTransportDriver {
 		
 		 @SuppressWarnings("unused")
 		RequestExecutor(HttpClient paramHttpClient, HttpMethodBase paramHttpMethodBase, JakartaTransportContext paramJakartaTransportContext, TransportApplication paramTransportApplication) {
-//				Logger logger = NewRelic.getAgent().getLogger();
 			 token = NewRelic.getAgent().getTransaction().getToken();
-//				logger.log(Level.FINE, "Got token from transaction {0} in {1}.<init>", token,getClass().getName());
 		 }
 		
-		@Trace(dispatcher=true)
+		@Trace(async=true)
 		public void run() {
 			if(token != null) {
-//				Logger logger = NewRelic.getAgent().getLogger();
 				token.linkAndExpire();
-//				logger.log(Level.FINE, "Linked to token {0} in {1}.run", token,getClass().getName());
 				token = null;
 			}
 			Weaver.callOriginal();

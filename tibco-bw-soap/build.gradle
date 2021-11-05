@@ -1,13 +1,16 @@
 
-// Build.gradle generated for instrumentation module tibco-bw-services-5
+// Build.gradle generated for instrumentation module tibco-bw-soap
 
 apply plugin: 'java'
 
 dependencies {
-   implementation 'commons-httpclient:commons-httpclient:2.0.2'
+   // Declare a dependency on each JAR you want to instrument
+   // Example:
+   // implementation 'javax.servlet:servlet-api:2.5'
 
    // New Relic Java Agent dependencies
-   implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
+   implementation 'com.newrelic.agent.java:newrelic-agent:6.4.1'
+   implementation 'com.newrelic.agent.java:newrelic-api:6.4.1'
    implementation fileTree(include: ['*.jar'], dir: '../libs')
    implementation fileTree(include: ['*.jar'], dir: '../test-lib')
    implementation fileTree(include: ['*.jar'], dir: 'lib')
@@ -15,7 +18,7 @@ dependencies {
 
 jar {
   manifest {
-    attributes 'Implementation-Title': 'com.newrelic.instrumentation.tibco-bw-services-5'
+    attributes 'Implementation-Title': 'com.newrelic.instrumentation.tibco-bw-soap'
     attributes 'Implementation-Vendor': 'New Relic'
     attributes 'Implementation-Vendor-Id': 'com.newrelic'
     attributes 'Implementation-Version': 1.0
