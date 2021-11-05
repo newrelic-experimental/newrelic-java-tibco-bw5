@@ -95,7 +95,6 @@ public class NRProcessStats  implements AgentConfigListener
 			event.put("ExecutionTime", this.invokeTime);
 			event.put("Elapsed Time", this.elapsedTime);
 			NewRelic.getAgent().getInsights().recordCustomEvent("ProcessEvent", event);
-			//logger.log(Level.FINER, "Posting JobEvent to Insights: {0}", new Object[] { event });
 
 			NewRelic.getAgent().getMetricAggregator().recordResponseTimeMetric(metricName + "/ExecutionTime", this.invokeTime.longValue());
 			NewRelic.getAgent().getMetricAggregator().recordResponseTimeMetric(metricName + "/ElapsedTime", this.elapsedTime.longValue());

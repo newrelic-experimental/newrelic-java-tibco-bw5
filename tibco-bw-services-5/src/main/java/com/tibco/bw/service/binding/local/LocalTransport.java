@@ -1,8 +1,5 @@
 package com.tibco.bw.service.binding.local;
 
-import java.util.logging.Level;
-
-import com.newrelic.api.agent.Logger;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Token;
 import com.newrelic.api.agent.Trace;
@@ -38,20 +35,16 @@ public class LocalTransport {
 		private Token token;
 		
 		public RequestExecutor(EndpointOperationReference paramEndpointOperationReference, XiNode paramXiNode, ReplyHandler paramReplyHandler) {
-//			Logger logger = NewRelic.getAgent().getLogger();
 			Transaction transaction = NewRelic.getAgent().getTransaction();
 			if(transaction != null) {
 				token = transaction.getToken();
-//				logger.log(Level.FINE, "Got token from transaction {0} in {1}.<init>", token,getClass().getName());
 			}
 		}
 		
-		@Trace
+		@Trace(async=true)
 		public void run() {
-//			Logger logger = NewRelic.getAgent().getLogger();
 			if(token != null) {
 				token.linkAndExpire();
-//				logger.log(Level.FINE, "Linked and expired token {0} in {1}.run", token,getClass().getName());
 				token = null;
 			}
 			Weaver.callOriginal();

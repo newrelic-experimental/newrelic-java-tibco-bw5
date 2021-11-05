@@ -7,7 +7,6 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -30,6 +29,12 @@ import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.TracedMethod;
 import com.newrelic.api.agent.Transaction;
 import com.newrelic.api.agent.TransactionNamePriority;
+import com.tibco.pe.plugin.ActivityContext;
+import com.tibco.pe.plugin.ProcessContext;
+import com.tibco.plugin.share.jms.ReceiverConfiguration;
+import com.tibco.plugin.share.jms.SenderRequestMessage;
+import com.tibco.xml.soap.api.transport.TransportContext;
+import com.tibco.xml.soap.api.transport.TransportUri;
 
 public class TibcoUtils implements AgentConfigListener {
 
@@ -98,12 +103,18 @@ public class TibcoUtils implements AgentConfigListener {
 		return nameMetric(dest, "Produce");
 	}
 
-	public static void saveMessageParameters(Message msg) {
+	public static void saveMessageParameters(Message msg, Map<String, Object> attributes) {
 		if (msg != null) {
-			Map<String,String> params = getMessageParameters(msg);
-			Set<Entry<String, String>> entries = params.entrySet();
-			for(Entry<String,String> entry :entries) {
-				NewRelic.addCustomParameter(entry.getKey(), entry.getValue());
+			if(attributes != null) {
+				Map<String,String> params = getMessageParameters(msg);
+				Set<String> keys = params.keySet();
+				
+				for(String key : keys) {
+					String value = params.get(key);
+					if(value != null) {
+						attributes.put("MessageProperty-"+key, value);
+					}
+				}
 			}
 		}
 	}
@@ -115,15 +126,12 @@ public class TibcoUtils implements AgentConfigListener {
 		{
 			Enumeration<?> parameterEnum = msg.getPropertyNames();
 			if ((parameterEnum == null) || (!parameterEnum.hasMoreElements())) {
-				NewRelic.getAgent().getLogger().log(Level.FINE, "No message parameters found");
 				return Collections.emptyMap();
 			}
 
 			while (parameterEnum.hasMoreElements()) {
 				String key = (String)parameterEnum.nextElement();
-				NewRelic.getAgent().getLogger().log(Level.FINE, "message key: ",key);
 				Object val = msg.getObjectProperty(key);
-				NewRelic.getAgent().getLogger().log(Level.FINE, "message parameter: ",key," = ",val == null ? null : val.toString());
 
 				result.put(key, val == null ? null : val.toString());
 			}
@@ -237,7 +245,9 @@ public class TibcoUtils implements AgentConfigListener {
 			} else {
 				tracer.addRollupMetricName(new String[] { "External", "allOther" });
 			}
-			NewRelic.getAgent().getTracedMethod().addOutboundRequestHeaders(message == null ? null : new JMSOutboundHeader(message));
+			JMSHeaders headers = new JMSHeaders(message);
+			
+			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		}
 	}
 	
@@ -282,4 +292,62 @@ public class TibcoUtils implements AgentConfigListener {
         }
     }
 	
+	public static void addSenderRequestMessage(Map<String, Object> attributes, SenderRequestMessage message) {
+		if(message != null) {
+			String temp = null;
+			try {
+				temp = message.getCorelationId();
+			} catch (JMSException e) {
+			}
+			addAttribute(attributes, "SenderRequestMessage-CorelationId", temp);
+			addAttribute(attributes, "SenderRequestMessage-ReplyToName", message.getReplyToName());
+			addAttribute(attributes, "SenderRequestMessage-Type", message.getType());
+			addAttribute(attributes, "SenderRequestMessage-DestinationName", message.getDestinationName());			
+		}
+	}
+	
+	public static void addProcessContext(Map<String, Object> attributes, ProcessContext context) {
+		if(context != null) {
+			addAttribute(attributes, "ProcessContext-FullCallName", context.getFullCallName());
+			addAttribute(attributes, "ProcessContext-ID", context.getId());
+			addAttribute(attributes, "ProcessContext-InvocationName", context.getInvocationName());
+			addAttribute(attributes, "ProcessContext-Name", context.getName());
+			addAttribute(attributes, "ProcessContext-Service", context.getService());
+		}
+		
+	}
+	
+	public static void addActivityContext(Map<String,Object> attributes, ActivityContext context) {
+		if(context != null) {
+			addAttribute(attributes, "ActivityContext-Name", context.getName());
+			addAttribute(attributes, "ActivityContext-ProcessModelName", context.getProcessModelName());
+			addAttribute(attributes, "ActivityContext-TraceSource", context.getTraceSource());
+		}
+	}
+	
+	public static void addReceiverConfiguration(Map<String,Object> attributes, ReceiverConfiguration config) {
+		if(config != null) {
+			addAttribute(attributes, "ReceiverConfiguration-Destination", config.getDestinationName());
+			addAttribute(attributes, "ReceiverConfiguration-MessageType", config.getMessageType());
+			addAttribute(attributes, "ReceiverConfiguration-Selector", config.getSelector());
+			addAttribute(attributes, "ReceiverConfiguration-SubName", config.getSubName());
+		}
+	}
+	
+	public static void addTransportContext(Map<String,Object> attributes, TransportContext context) {
+		if(context != null) {
+			addAttribute(attributes, "TransportContext-SoapAction", context.getSoapAction());
+			TransportUri tUri = context.getTransportUri();
+			if(tUri != null) {
+				addAttribute(attributes, "TransportContext-TransportUri", tUri.toString());				
+			}
+			//addAttribute(attributes, "TransportContext-SoapAction", context.get);
+		}
+	}
+	
+	public static void addAttribute(Map<String, Object> attributes, String key, Object value) {
+		if(attributes != null && key != null && !key.isEmpty() && value != null) {
+			attributes.put(key, value);
+		}
+	}
 }

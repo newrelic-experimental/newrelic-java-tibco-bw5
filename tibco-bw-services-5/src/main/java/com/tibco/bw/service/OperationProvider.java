@@ -1,7 +1,5 @@
 package com.tibco.bw.service;
 
-import java.util.logging.Level;
-
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.MatchType;
@@ -26,7 +24,6 @@ public abstract class OperationProvider {
 					serviceName = "UnknownService";
 				}
 				NewRelic.addCustomParameter("Service Name", serviceName);
-				NewRelic.getAgent().getLogger().log(Level.FINER, "Added serviceURI: {0} and Name: {1}", serviceURI, serviceName);
 				NewRelic.getAgent().getTracedMethod().setMetricName(new String[] { "Custom", "OperationProvider", serviceName });
 			}
 		}

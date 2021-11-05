@@ -18,9 +18,8 @@ public abstract class StatsCollector {
 		} else {
 			result = "error";
 		}
-		if(job.token != null) {
-			job.token.expire();
-			job.token = null;
+		if(job.headers != null) {
+			job.headers = null;
 		}
 		long startTime = job.h;
 		String jobName = job.getName();

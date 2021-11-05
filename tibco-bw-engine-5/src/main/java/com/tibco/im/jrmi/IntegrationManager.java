@@ -5,25 +5,26 @@ import java.rmi.RemoteException;
 
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
+import com.newrelic.api.agent.TransportType;
 import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
-import com.nr.tibco.engine.instrumentation.OutboundWrapper;
+import com.nr.tibco.engine.instrumentation.ServerHeaders;
 
 @Weave(type=MatchType.Interface)
 public abstract class IntegrationManager {
 
 	@Trace(dispatcher=true)
 	public void send(Request paramRequest, Remote paramRemote) throws RemoteException {
-		OutboundWrapper wrapper = new OutboundWrapper(paramRequest);
-		NewRelic.getAgent().getTracedMethod().addOutboundRequestHeaders(wrapper);
+		ServerHeaders headers = new ServerHeaders(paramRequest);
+		NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
 		Weaver.callOriginal();
 	}
 
 	@Trace(dispatcher=true)
 	public void send(Request paramRequest) throws RemoteException {
-		OutboundWrapper wrapper = new OutboundWrapper(paramRequest);
-		NewRelic.getAgent().getTracedMethod().addOutboundRequestHeaders(wrapper);
+		ServerHeaders headers = new ServerHeaders(paramRequest);
+		NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
 		Weaver.callOriginal();
 
 	}
