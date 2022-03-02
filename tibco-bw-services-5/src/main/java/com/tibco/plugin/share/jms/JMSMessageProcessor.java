@@ -5,6 +5,8 @@ import java.util.logging.Level;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.Topic;
 
 import com.newrelic.api.agent.DestinationType;
 import com.newrelic.api.agent.MessageConsumeParameters;
@@ -26,9 +28,31 @@ public abstract class JMSMessageProcessor {
 
 	@Trace(dispatcher=true)
 	public void processMessage(JMSEventContext jmsEventContext) {
-		
+		NewRelic.getAgent().getLogger().log(Level.FINE, "Call to {0}.processMessage", getClass());
 		JMSReceiver receiver = jmsEventContext.evs;
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		if(jmsEventContext != null) {
+			TibcoUtils.addAttribute(attributes, "Correlation-ID", jmsEventContext.correlationId);
+			TibcoUtils.addAttribute(attributes, "TypeHeader", jmsEventContext.typeHeader);
+			TibcoUtils.addAttribute(attributes, "Correlation-ID", jmsEventContext.correlationId);
+			if(jmsEventContext.isQueue()) {
+				TibcoUtils.addAttribute(attributes, "Type", "Queue");
+			} else {
+				TibcoUtils.addAttribute(attributes, "Type", "Topic");
+			}
+			if(jmsEventContext.replyToDest != null) {
+				try {
+					if(jmsEventContext.replyToDest instanceof Queue) {
+						Queue queue = (Queue)jmsEventContext.replyToDest;
+						TibcoUtils.addAttribute(attributes, "ReplyToDestinatino", queue.getQueueName());
+					} else if(jmsEventContext.replyToDest instanceof Topic) {
+						Topic topic = (Topic)jmsEventContext.replyToDest;
+						TibcoUtils.addAttribute(attributes, "ReplyToDestinatino", topic.getTopicName());
+					}
+				} catch (JMSException e) {
+				}
+			}
+		}
 		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
 		String recDest = "Unknown";
 		if(receiver != null) {
