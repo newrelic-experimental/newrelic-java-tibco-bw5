@@ -22,9 +22,9 @@ public class NRTibcoUtils {
 	
 	public static void addProcessContext(Map<String, Object> attributes, ProcessContext context) {
 		if(context != null) {
-			addAttribute(attributes, "ProcessContext-FullCallName", context.getFullCallName());
+//			addAttribute(attributes, "ProcessContext-FullCallName", context.getFullCallName());
 			addAttribute(attributes, "ProcessContext-ID", context.getId());
-			addAttribute(attributes, "ProcessContext-InvocationName", context.getInvocationName());
+//			addAttribute(attributes, "ProcessContext-InvocationName", context.getInvocationName());
 			addAttribute(attributes, "ProcessContext-Name", context.getName());
 			addAttribute(attributes, "ProcessContext-Service", context.getService());
 		}

@@ -41,6 +41,7 @@ public class TibcoUtils implements AgentConfigListener {
 	private static final String IGNORESKEY = "TIBCO.jms.ignores";
 	public static List<String> destinationIgnores;
 	private static boolean initialized = false;
+	private static final String ATTRIBUTE_PREFIX = "Tibco";
 	
 	static {
 		initializeIgnores();
@@ -308,9 +309,15 @@ public class TibcoUtils implements AgentConfigListener {
 	
 	public static void addProcessContext(Map<String, Object> attributes, ProcessContext context) {
 		if(context != null) {
-			addAttribute(attributes, "ProcessContext-FullCallName", context.getFullCallName());
+			try {
+				addAttribute(attributes, "ProcessContext-FullCallName", context.getFullCallName());
+			} catch (Exception e) {
+			}
 			addAttribute(attributes, "ProcessContext-ID", context.getId());
-			addAttribute(attributes, "ProcessContext-InvocationName", context.getInvocationName());
+			try {
+				addAttribute(attributes, "ProcessContext-InvocationName", context.getInvocationName());
+			} catch (Exception e) {
+			}
 			addAttribute(attributes, "ProcessContext-Name", context.getName());
 			addAttribute(attributes, "ProcessContext-Service", context.getService());
 		}
@@ -347,6 +354,7 @@ public class TibcoUtils implements AgentConfigListener {
 	
 	public static void addAttribute(Map<String, Object> attributes, String key, Object value) {
 		if(attributes != null && key != null && !key.isEmpty() && value != null) {
+			if(!key.startsWith(ATTRIBUTE_PREFIX)) key = ATTRIBUTE_PREFIX + "-" + key;
 			attributes.put(key, value);
 		}
 	}
