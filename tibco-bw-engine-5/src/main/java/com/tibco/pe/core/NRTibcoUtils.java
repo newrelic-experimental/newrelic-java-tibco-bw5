@@ -5,6 +5,7 @@ import java.util.Map;
 import com.newrelic.api.agent.Transaction;
 import com.newrelic.api.agent.TransportType;
 import com.nr.tibco.engine.instrumentation.BWHeaders;
+import com.nr.tibco.engine.instrumentation.HeaderUtils;
 import com.tibco.pe.plugin.ActivityContext;
 import com.tibco.pe.plugin.ProcessContext;
 import com.tibco.xml.datamodel.XiNode;
@@ -115,7 +116,9 @@ public class NRTibcoUtils {
 			} else if(job.headers.isEmpty()) {
 				transaction.insertDistributedTraceHeaders(job.headers);
 			} else {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				if(HeaderUtils.canCallAccept()) {
+					transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				}
 			}
 		}
 	}

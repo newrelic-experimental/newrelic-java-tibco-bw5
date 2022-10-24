@@ -11,6 +11,7 @@ import com.newrelic.api.agent.weaver.NewField;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
 import com.nr.tibco.engine.instrumentation.BWHeaders;
+import com.nr.tibco.engine.instrumentation.HeaderUtils;
 import com.nr.tibco.engine.instrumentation.JobUtils;
 import com.nr.tibco.engine.instrumentation.NRActivityStats;
 import com.tibco.pe.plugin.ProcessContext;
@@ -55,7 +56,9 @@ implements ProcessContext
 		} else if(headers.isEmpty()) {
 			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		} else {
-			NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			if(HeaderUtils.canCallAccept()) {
+				NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			}
 		}
 		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
@@ -104,7 +107,9 @@ implements ProcessContext
 		} else if(headers.isEmpty()) {
 			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		} else {
-			NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			if(HeaderUtils.canCallAccept()) {
+				NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			}
 		}
 		
 		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
@@ -132,7 +137,9 @@ implements ProcessContext
 		} else if(headers.isEmpty()) {
 			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		} else {
-			NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			if(HeaderUtils.canCallAccept()) {
+				NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			}
 		}
 
 		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
@@ -155,7 +162,9 @@ implements ProcessContext
 		} else if(headers.isEmpty()) {
 			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		} else {
-			NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			if(HeaderUtils.canCallAccept()) {
+				NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			}
 		}
 		Weaver.callOriginal();
 	}
@@ -168,7 +177,9 @@ implements ProcessContext
 		} else if(headers.isEmpty()) {
 			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		} else {
-			NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			if(HeaderUtils.canCallAccept()) {
+				NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			}
 		}
 		Weaver.callOriginal();
 	}
@@ -181,7 +192,9 @@ implements ProcessContext
 		} else if(headers.isEmpty()) {
 			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
 		} else {
-			NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			if(HeaderUtils.canCallAccept()) {
+				NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
+			}
 		}
 		HashMap<String, Object> attributes = new HashMap<String, Object>();
 		NRTibcoUtils.addTrack(attributes, var9);

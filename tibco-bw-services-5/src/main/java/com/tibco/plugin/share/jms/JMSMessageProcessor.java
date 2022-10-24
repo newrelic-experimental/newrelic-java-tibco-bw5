@@ -18,6 +18,7 @@ import com.newrelic.api.agent.TransportType;
 import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
+import com.nr.instrumentation.bw.services.HeaderUtils;
 import com.nr.instrumentation.bw.services.JMSHeaders;
 import com.nr.instrumentation.bw.services.TibcoUtils;
 import com.tibco.plugin.share.jms.impl.JMSEventContext;
@@ -64,8 +65,10 @@ public abstract class JMSMessageProcessor {
 		}
 		NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, true, "MessageProcessor", new String[] {"JMSMessageProcessor",recDest});
 		Message msg = jmsEventContext.getMessage();
-		JMSHeaders headers = new JMSHeaders(msg);
-		NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.JMS, headers);
+		if(HeaderUtils.canCallAccept()) {
+			JMSHeaders headers = new JMSHeaders(msg);
+			NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.JMS, headers);
+		}
 		try {
 			DestinationType destinationType= TibcoUtils.getDestinationType(msg.getJMSDestination());
 			MessageConsumeParameters params = MessageConsumeParameters.library("JMSMessageProcessor").destinationType(destinationType).destinationName(recDest).inboundHeaders(null).build();

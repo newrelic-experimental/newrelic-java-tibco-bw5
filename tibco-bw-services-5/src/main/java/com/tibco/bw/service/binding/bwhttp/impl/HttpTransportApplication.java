@@ -12,6 +12,7 @@ import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
 import com.nr.instrumentation.bw.services.BWHeaders;
+import com.nr.instrumentation.bw.services.HeaderUtils;
 import com.tibco.bw.service.Endpoint;
 import com.tibco.plugin.share.http.wssdk.ServletContext;
 import com.tibco.xml.soap.api.transport.TransportContext;
@@ -21,7 +22,7 @@ import com.tibco.xml.soap.api.transport.TransportUri;
 
 @Weave(type=MatchType.ExactClass)
 public abstract class HttpTransportApplication {
-	
+
 	@Trace(dispatcher=true)
 	public void processMessage(TransportMessage transportMsg) {
 		TransportContext transportCtx = transportMsg.getTransportContext();
@@ -39,29 +40,31 @@ public abstract class HttpTransportApplication {
 			transaction.setTransactionName(TransactionNamePriority.FRAMEWORK_HIGH, true, "HTTPTransport", new String[] {"/UnknownTransportURI"});
 		}
 		ServletContext servletContext = (ServletContext)transportCtx;
-		BWHeaders headers = new BWHeaders(servletContext.getRequestMessage());
-		NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.HTTP, headers);
+		if(HeaderUtils.canCallAccept()) {
+			BWHeaders headers = new BWHeaders(servletContext.getRequestMessage());
+			NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.HTTP, headers);
+		}
 		if(theURI == null) {
 			theURI = URI.create("http://UnknownHost");
 		}
-		
+
 		HttpParameters params = HttpParameters.library("HttpTransportApplication").uri(theURI).procedure("processMessage").inboundHeaders(null).build();
 		NewRelic.getAgent().getTracedMethod().reportAsExternal(params);
 		transaction.convertToWebTransaction();
 		Weaver.callOriginal();
 	}
-	
+
 	protected void invokeServiceEndpoint(Endpoint paramEndpoint, TransportMessage paramTransportMessage) {
 		NewRelic.addCustomParameter("Endpoint", paramEndpoint.getName());
 		Weaver.callOriginal();
 	}
-	
+
 	@Weave(type=MatchType.Interface)
 	static class Strategy
-	  {
+	{
 		@Trace(dispatcher=true)
-	    public void execute(DefaultBwHttpReplyHandler paramDefaultBwHttpReplyHandler) {
-    		Weaver.callOriginal();
-	    }
-	  }
+		public void execute(DefaultBwHttpReplyHandler paramDefaultBwHttpReplyHandler) {
+			Weaver.callOriginal();
+		}
+	}
 }

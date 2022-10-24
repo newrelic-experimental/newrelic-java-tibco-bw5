@@ -8,6 +8,7 @@ import com.newrelic.api.agent.TracedMethod;
 import com.newrelic.api.agent.TransportType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
+import com.nr.tibco.engine.instrumentation.HeaderUtils;
 import com.tibco.pe.plugin.ProcessContext;
 import com.tibco.xml.datamodel.XiNode;
 
@@ -34,8 +35,10 @@ public abstract class SignalInActivity {
 		traced.setMetricName(new String[] {"Custom","SignalInActivity",getName()});
 		if(Job.class.isInstance(processContext)) {
 			Job job = (Job)processContext;
-			if(job.headers != null) {
-				NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+			if(job.headers != null && !job.headers.isEmpty()) {
+				if(HeaderUtils.canCallAccept()) {
+					NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				}
 			}
 		}
 

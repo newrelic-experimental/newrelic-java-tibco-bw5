@@ -12,6 +12,7 @@ import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
 import com.nr.tibco.engine.instrumentation.BWHeaders;
+import com.nr.tibco.engine.instrumentation.HeaderUtils;
 import com.nr.tibco.engine.instrumentation.JobUtils;
 import com.tibco.pe.plugin.ProcessContext;
 import com.tibco.xml.datamodel.XiNode;
@@ -41,7 +42,9 @@ public abstract class Task {
 			} else if(job.headers.isEmpty()) {
 				transaction.insertDistributedTraceHeaders(job.headers);
 			} else {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				if(HeaderUtils.canCallAccept()) {
+					transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				}
 			}
  		}
 		

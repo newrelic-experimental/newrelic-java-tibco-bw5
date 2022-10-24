@@ -12,6 +12,7 @@ import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
 import com.nr.tibco.engine.instrumentation.BWHeaders;
+import com.nr.tibco.engine.instrumentation.HeaderUtils;
 import com.nr.tibco.engine.instrumentation.JobUtils;
 import com.tibco.pe.plugin.EventContext;
 import com.tibco.xml.data.primitive.ExpandedName;
@@ -21,7 +22,7 @@ import com.tibco.xml.datamodel.XiNode;
 public abstract class JobCreator {
 
 	public abstract String getName();
-	
+
 	@Trace(dispatcher=true)
 	protected Job createJob(JobData jobData, Workflow workflow, EventContext paramEventContext, boolean paramBoolean) {
 		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
@@ -42,12 +43,14 @@ public abstract class JobCreator {
 			} else if(job.headers.isEmpty()) {
 				transaction.insertDistributedTraceHeaders(job.headers);
 			} else {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				if(HeaderUtils.canCallAccept()) {
+					NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				}
 			}
 		}
 		return job;
 	}
-	
+
 	@Trace(dispatcher=true)
 	protected Job createJob(Workflow workflow, XiNode xiNode, EventContext eventContext, boolean paramBoolean) {
 		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
@@ -59,7 +62,7 @@ public abstract class JobCreator {
 		traced.addCustomAttributes(attributes);
 		String workflowName = workflow != null ? workflow.getName() : "UnknownWorkflow";
 		ExpandedName expandedName = xiNode != null ? xiNode.getName() : null;
-		
+
 		String name = "XiNode";
 		StringBuffer sb = new StringBuffer();
 		if(expandedName != null) {
@@ -87,7 +90,9 @@ public abstract class JobCreator {
 			} else if(job.headers.isEmpty()) {
 				transaction.insertDistributedTraceHeaders(job.headers);
 			} else {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				if(HeaderUtils.canCallAccept()) {
+					transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				}
 			}
 		}
 		return job;

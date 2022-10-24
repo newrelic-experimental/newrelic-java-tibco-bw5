@@ -11,6 +11,7 @@ import com.newrelic.api.agent.TransportType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
 import com.nr.tibco.engine.instrumentation.BWHeaders;
+import com.nr.tibco.engine.instrumentation.HeaderUtils;
 import com.nr.tibco.engine.instrumentation.JobUtils;
 import com.tibco.pe.util.Reminder;
 
@@ -28,7 +29,9 @@ public abstract class JobDispatcher {
 			} else if(localJob.headers.isEmpty()) {
 				transaction.insertDistributedTraceHeaders(localJob.headers);
 			} else {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, localJob.headers);
+				if(HeaderUtils.canCallAccept()) {
+					transaction.acceptDistributedTraceHeaders(TransportType.Other, localJob.headers);
+				}
 			}
 			
 		}
@@ -55,7 +58,9 @@ public abstract class JobDispatcher {
 				NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, true, "Job", new String[] {JobUtils.maskJobNumber(fullCallName)});
 			}
 			if(job.headers != null && !job.headers.isEmpty()) {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				if(HeaderUtils.canCallAccept()) {
+					transaction.acceptDistributedTraceHeaders(TransportType.Other, job.headers);
+				}
 			}
 			return Weaver.callOriginal();
 		}
