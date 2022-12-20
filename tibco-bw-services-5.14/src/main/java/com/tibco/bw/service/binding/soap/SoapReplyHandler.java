@@ -1,6 +1,6 @@
 package com.tibco.bw.service.binding.soap;
 
-import com.newrelic.agent.bridge.Token;
+import com.newrelic.api.agent.Token;
 import com.newrelic.api.agent.weaver.NewField;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
