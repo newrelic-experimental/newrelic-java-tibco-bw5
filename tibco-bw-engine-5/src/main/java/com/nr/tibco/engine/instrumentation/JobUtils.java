@@ -9,12 +9,13 @@ public class JobUtils {
 
 	public static String ALLDIGITS = "\\d+";
 	public static String JOBANDDIGITS = "Job-\\d+";
+	public static String JOBANDDIGITS2 = "Job-\\d+-\\d+";
 	
 	public static String JOBMASK = "JobNumberXXXXX";
 	
 	public static String maskJobNumber(String job) {
 		
-		if(job.matches(ALLDIGITS) || job.matches(JOBANDDIGITS)) {
+		if(job.matches(ALLDIGITS) || job.matches(JOBANDDIGITS) || job.matches(JOBANDDIGITS2)) {
 			return JOBMASK;
 		}
 		
